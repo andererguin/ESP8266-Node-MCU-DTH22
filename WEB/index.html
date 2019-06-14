@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Set the size of the div element that contains the map */
+      #map {
+        height: 400px;  
+        width: 100%;  
+       }
+    </style>
+  </head>
+  <body>
+    <div align="center">
+			<font face = "Verdana" size = "2"><b>Steam Kontrol Panelaren mapa</b></font>
+	</div>
+    <!--The div element for the map -->
+  <div id="map"></div>
+	<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
+    <script>
+// Initialize and add the map
+function initMap() {
+  // JavaScript Document
+  // Set the configuration for your app
+    var config = {
+    apiKey: "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+    authDomain: "steam-000000.firebaseapp.com",
+    databaseURL: "https://steam-000000.firebaseio.com",
+    projectId: "steam-000000",
+    storageBucket: "steam-000000.appspot.com",
+    messagingSenderId: "xxxxxxxxxxxxx"
+  };
+  // Get a reference to the database service
+  firebase.initializeApp(config);
+
+  // Get a reference to the database service
+  var database = firebase.database();
+	
+  var query = firebase.database().ref("Ekipoak").limitToLast(10).orderByKey();
+	var ekipoa_izena = "";
+	var ekipoa_url = "";
+	var ekipoa_latitudea = "";
+	var ekipoa_longitudea = "";
+	var ekipoa_helbidea = "";
+	
+  // Get element from the DOM
+  // The location of Uluru
+  var mapa = {lat: 43.2921336, lng: -1.8989592};
+  
+  // The map, centered at Uluru
+  var map = new google.maps.Map(
+      document.getElementById('map'), {zoom: 17, center: mapa});
+
+	query.once("value")
+  	.then(function(snapshot) {
+		snapshot.forEach(function(childSnapshot) {
+		  
+			// key will be "x" the first time and "y" the second time
+			var key = childSnapshot.key;
+			
+			// childData will be the actual contents of the child
+			
+			var childData = childSnapshot.val();;
+
+			ekipoa_izena = childSnapshot.child("Izena").val();
+			console.log("izena: " + ekipoa_izena);
+			ekipoa_helbidea = childSnapshot.child("Helbidea").val();
+			console.log("helbidea: " + ekipoa_helbidea);
+			ekipoa_longitudea = childSnapshot.child("Longitudea").val();
+			console.log("longitudea: " + ekipoa_longitudea);
+			ekipoa_latitudea = childSnapshot.child("Latitudea").val();
+			console.log("latitudea: " + ekipoa_latitudea);
+			ekipoa_url = childSnapshot.child("Url").val();
+			console.log("url: " + ekipoa_url);
+			
+		  // The marker, positioned at Uluru
+		  //var marker = new google.maps.Marker({position: ekipoa, map: map});
+		  var ekipoa = {lat: ekipoa_latitudea, lng: ekipoa_longitudea};
+		  var marker = new google.maps.Marker({
+			position: ekipoa,
+			url: ekipoa_url,
+			title: ekipoa_izena
+		});
+		  google.maps.event.addListener(marker, 'click', function() {
+			  window.location.href = marker.url;
+			});
+		  marker.setMap(map);
+			
+		});
+	}); // END QUERY
+}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7KS7fNZahZuSeOOXOyCEtARHPX1htN5A&callback=initMap">
+    </script>
+  </body>
+</html>
